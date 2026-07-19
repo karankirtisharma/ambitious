@@ -74,9 +74,12 @@ function Backdrop() {
         <cylinderGeometry args={[15, 15, 16, 40, 1, true]} />
         <meshStandardMaterial color="#070908" roughness={1} metalness={0} side={1} />
       </mesh>
-      <mesh position={[0, -0.7, -8.5]}>
-        <planeGeometry args={[26, 14.6]} />
-        <meshBasicMaterial map={vault} fog color="#e2e6e2" toneMapped />
+      {/* Wall-only crop (the plate's baked floor is cut and its bottom edge
+          fades to bg) — same world mapping as the full frame, so the vault
+          door stays centered behind the protocol core. */}
+      <mesh position={[0, 1.93, -8.5]}>
+        <planeGeometry args={[26, 9.34]} />
+        <meshBasicMaterial map={vault} fog color="#e2e6e2" toneMapped transparent depthWrite={false} />
       </mesh>
     </>
   );
