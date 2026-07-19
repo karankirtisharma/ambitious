@@ -5,7 +5,7 @@ import { Color, Group, Mesh, MeshStandardMaterial } from 'three';
 import type { Side } from '../state/transitions';
 import { send } from '../state/store';
 import { lightProxy } from '../motion/proxies';
-import { CHAR_X, PLATFORM_TOP } from '../config/cameraPoses';
+import { CHAR_X, STAND_Y } from '../config/cameraPoses';
 import { useProceduralIdle } from '../hooks/useProceduralIdle';
 import { hoverEnter, hoverLeave } from './hoverIntent';
 
@@ -65,7 +65,7 @@ export function Character({ side }: { side: Side }) {
 
   useProceduralIdle(
     { root, breath, sway },
-    { side: isLeft ? 'left' : 'right', phase: isLeft ? 0 : 2.7 }
+    { side: isLeft ? 'left' : 'right', phase: isLeft ? 0 : 2.7, baseY: STAND_Y[side] }
   );
 
   // Apply the conductor-tweened dim value — only while it is actually moving.
@@ -79,7 +79,7 @@ export function Character({ side }: { side: Side }) {
   });
 
   return (
-    <group ref={root} position={[isLeft ? -CHAR_X : CHAR_X, PLATFORM_TOP, 0]}>
+    <group ref={root} position={[isLeft ? -CHAR_X : CHAR_X, STAND_Y[side], 0]}>
       <group ref={breath} position-y={PIVOT_Y}>
         <group position-y={-PIVOT_Y}>
           <group ref={sway}>

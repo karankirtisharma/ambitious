@@ -24,6 +24,9 @@ export function useProceduralIdle(
     side: 'left' | 'right';
     /** Per-character phase offset so the two never sync up. */
     phase: number;
+    /** Root rest height — the hook owns root.position.y and must compose
+     *  the lean rise ON TOP of this, never overwrite it. */
+    baseY: number;
   }
 ) {
   // Ref, not a render-scoped object: useFrame reads the latest closure, and a
@@ -41,7 +44,7 @@ export function useProceduralIdle(
       sway.rotation.set(0, 0, 0);
       sway.position.set(0, 0, 0);
       root.rotation.y = opts.side === 'left' ? characterProxy.rotL : characterProxy.rotR;
-      root.position.y = 0;
+      root.position.y = opts.baseY;
       return;
     }
 
@@ -66,6 +69,6 @@ export function useProceduralIdle(
     const base = opts.side === 'left' ? characterProxy.rotL : characterProxy.rotR;
     const sign = opts.side === 'left' ? 1 : -1;
     root.rotation.y = base + sign * leanState.v * 0.07;
-    root.position.y = leanState.v * 0.012;
+    root.position.y = opts.baseY + leanState.v * 0.012;
   });
 }
