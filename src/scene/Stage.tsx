@@ -113,23 +113,14 @@ function Backdrop() {
   vault.needsUpdate = true;
 
   return (
-    <>
-      {/* The void wrapping the sides and above the plate. */}
-      <mesh position={[0, 5, -2]}>
-        <cylinderGeometry args={[15, 15, 16, 40, 1, true]} />
-        <meshStandardMaterial color="#070908" roughness={1} metalness={0} side={1} />
-      </mesh>
-      {/* Full frame, opaque — its baked floor lives below the horizon where
-          the real floor and decal occlude it; whatever peeks through at the
-          junction is the same scene, so the seam dissolves. Vault door
-          centered behind the protocol core. */}
-      {/* 3x the frame in each axis; the middle tile keeps the original
-          mapping, so the vault door stays centered behind the core. */}
-      <mesh position={[0, -0.7, -8.5]}>
-        <planeGeometry args={[78, 43.8]} />
-        <meshBasicMaterial map={vault} fog color="#e2e6e2" toneMapped />
-      </mesh>
-    </>
+    // 3x the frame in each axis; the middle tile keeps the original mapping,
+    // so the vault door stays centered behind the core. (The old backdrop
+    // cylinder is gone — the camera sat inside it and its near-black flanks
+    // occluded the plate at the view edges.)
+    <mesh position={[0, -0.7, -8.5]}>
+      <planeGeometry args={[78, 43.8]} />
+      <meshBasicMaterial map={vault} fog color="#e2e6e2" toneMapped />
+    </mesh>
   );
 }
 
