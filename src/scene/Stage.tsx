@@ -7,7 +7,9 @@ import { useStore } from '../state/store';
 import { DEBUG_FLAGS } from '../debugFlags';
 
 const VAULT_URL = `${import.meta.env.BASE_URL}env/vault.webp`;
+const FLOOR_URL = `${import.meta.env.BASE_URL}env/floor.webp`;
 useTexture.preload(VAULT_URL);
+useTexture.preload(FLOOR_URL);
 
 /**
  * The architectural void: a reflective slab, a fogged backdrop cylinder with
@@ -20,9 +22,34 @@ export function Stage() {
   return (
     <>
       <Floor tier={tier} />
+      <FloorPatch />
       <Backdrop />
       <Dust />
     </>
+  );
+}
+
+/**
+ * Pre-lit wet-stone decal over the reflector — fills the dead mid-ground
+ * between the platforms and the vault wall. Feathered alpha (premultiplied
+ * to black) lets the live reflections take over at its edges.
+ */
+function FloorPatch() {
+  const tex = useTexture(FLOOR_URL);
+  tex.colorSpace = SRGBColorSpace;
+
+  return (
+    <mesh rotation-x={-Math.PI / 2} position={[0, 0.008, -2.2]}>
+      <planeGeometry args={[19, 12]} />
+      <meshBasicMaterial
+        map={tex}
+        fog
+        transparent
+        depthWrite={false}
+        color="#d6dad6"
+        toneMapped
+      />
+    </mesh>
   );
 }
 
