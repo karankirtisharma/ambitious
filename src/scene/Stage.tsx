@@ -49,7 +49,7 @@ function FloorPatch() {
     // Deep enough that the far feathered edge tucks BEHIND the vault wall
     // (z −8.5) — solid stone runs into the wall base, no black gap band.
     <mesh rotation-x={-Math.PI / 2} position={[0, 0.008, -3.2]}>
-      <planeGeometry args={[27, 15]} />
+      <planeGeometry args={[27, 20]} />
       <meshBasicMaterial
         map={tex}
         fog
@@ -102,11 +102,14 @@ function Backdrop() {
   // centers behind the protocol core; its own floor hides below ours.
   const vault = useTexture(VAULT_URL);
   vault.colorSpace = SRGBColorSpace;
-  // Mirror-extend sideways: seamless joins, no stretch — the wall continues
-  // past the view edge on any aspect ratio instead of ending as a billboard.
+  // Mirror-extend in BOTH axes: seamless joins, no stretch — the wall
+  // continues past the view edge on any aspect ratio (ultrawide sideways,
+  // portrait upward — the mirrored ceiling reads as structure) instead of
+  // terminating as a billboard.
   vault.wrapS = MirroredRepeatWrapping;
-  vault.repeat.set(3, 1);
-  vault.offset.x = -1;
+  vault.wrapT = MirroredRepeatWrapping;
+  vault.repeat.set(3, 3);
+  vault.offset.set(-1, -1);
   vault.needsUpdate = true;
 
   return (
@@ -120,8 +123,10 @@ function Backdrop() {
           the real floor and decal occlude it; whatever peeks through at the
           junction is the same scene, so the seam dissolves. Vault door
           centered behind the protocol core. */}
+      {/* 3x the frame in each axis; the middle tile keeps the original
+          mapping, so the vault door stays centered behind the core. */}
       <mesh position={[0, -0.7, -8.5]}>
-        <planeGeometry args={[78, 14.6]} />
+        <planeGeometry args={[78, 43.8]} />
         <meshBasicMaterial map={vault} fog color="#e2e6e2" toneMapped />
       </mesh>
     </>
