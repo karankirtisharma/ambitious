@@ -103,12 +103,13 @@ function Backdrop() {
         <cylinderGeometry args={[15, 15, 16, 40, 1, true]} />
         <meshStandardMaterial color="#070908" roughness={1} metalness={0} side={1} />
       </mesh>
-      {/* Wall-only crop (the plate's baked floor is cut and its bottom edge
-          fades to bg) — same world mapping as the full frame, so the vault
-          door stays centered behind the protocol core. */}
-      <mesh position={[0, 1.93, -8.5]}>
-        <planeGeometry args={[26, 9.34]} />
-        <meshBasicMaterial map={vault} fog color="#e2e6e2" toneMapped transparent depthWrite={false} />
+      {/* Full frame, opaque — its baked floor lives below the horizon where
+          the real floor and decal occlude it; whatever peeks through at the
+          junction is the same scene, so the seam dissolves. Vault door
+          centered behind the protocol core. */}
+      <mesh position={[0, -0.7, -8.5]}>
+        <planeGeometry args={[26, 14.6]} />
+        <meshBasicMaterial map={vault} fog color="#e2e6e2" toneMapped />
       </mesh>
     </>
   );
