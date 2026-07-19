@@ -319,7 +319,7 @@
 .cy-protocol {
   position: fixed;
   left: 50%;
-  top: 45.5%;
+  top: 45%;
   /* the BUTTON's center — not the cluster's — lands on the 3D core */
   transform: translate(-50%, -43px);
   z-index: var(--z-hud);

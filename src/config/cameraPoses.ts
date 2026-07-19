@@ -9,13 +9,14 @@ export interface CameraPose {
 /** Character root X positions — the two pedestals. */
 export const CHAR_X = 2.2;
 /**
- * Measured stand heights: the platform's dish surface sits at y 0.352, and
- * each Tripo model's visible soles float above its own origin (stray sub-feet
- * geometry skewed the bbox normalization). root Y = dish − sole offset.
+ * Measured stand heights: the platform's dish surface sits at y 0.352 and
+ * both models' shoe soles sit at their own origin (verified via per-mesh
+ * world bounds — the shoe meshes, not the pants hem). Root = dish height,
+ * astronaut +7mm for his below-origin boot soles.
  */
-export const STAND_Y = { cypherpunk: 0.178, astronaut: 0.205 } as const;
+export const STAND_Y = { cypherpunk: 0.352, astronaut: 0.359 } as const;
 /** Chest height used by the energy bridge endpoints. */
-export const CHEST_Y = 1.51;
+export const CHEST_Y = 1.67;
 
 /**
  * One cinematic pose per state. The rig tweens between them like a dolly —

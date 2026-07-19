@@ -12,7 +12,7 @@ import {
 import { PLANE_VERT, CORE_FRAG, SHOCK_FRAG, ORBIT_VERT, ORBIT_FRAG } from './shaders';
 import { lightProxy, fxProxy } from '../motion/proxies';
 
-const CORE_POS = new Vector3(0, 1.32, 0);
+const CORE_POS = new Vector3(0, 1.42, 0);
 const ORBIT_COUNT = 200;
 
 /**
