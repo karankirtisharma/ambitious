@@ -23,8 +23,8 @@ export const cameraProxy = {
   parallax: 1,
 };
 
-/** Character base facing (radians) — slight inward turn toward each other. */
-export const CHAR_BASE_ROT = { left: 0.32, right: -0.32 } as const;
+/** Character base facing (radians) — both stand straight, facing camera. */
+export const CHAR_BASE_ROT = { left: 0, right: 0 } as const;
 
 export const characterProxy = {
   /** Root Y rotations; during sync the characters turn to face one another. */

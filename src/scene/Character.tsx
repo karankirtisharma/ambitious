@@ -18,6 +18,12 @@ const MODEL_URL: Record<Side, string> = {
 useGLTF.preload(MODEL_URL.cypherpunk);
 useGLTF.preload(MODEL_URL.astronaut);
 
+/**
+ * Each Tripo export has its own baked "forward" — a static correction so
+ * both models face the camera at rest, independent of any animated rotation.
+ */
+const MODEL_YAW: Record<Side, number> = { cypherpunk: 0, astronaut: Math.PI / 2 };
+
 /** Breath pivots from the pelvis so feet stay planted. */
 const PIVOT_Y = 0.95;
 
@@ -83,7 +89,9 @@ export function Character({ side }: { side: Side }) {
       <group ref={breath} position-y={PIVOT_Y}>
         <group position-y={-PIVOT_Y}>
           <group ref={sway}>
-            <primitive object={scene} />
+            <group rotation-y={MODEL_YAW[side]}>
+              <primitive object={scene} />
+            </group>
           </group>
         </group>
       </group>

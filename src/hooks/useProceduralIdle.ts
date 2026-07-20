@@ -6,6 +6,11 @@ import { easing } from 'maath';
 import { characterProxy } from '../motion/proxies';
 import { useStore } from '../state/store';
 
+/** Full revolution every 42s — a slow, premium showcase turn, never a toy spin. */
+const SPIN_SPEED = (Math.PI * 2) / 42;
+
+const EXPLORABLE = new Set(['idle', 'hoverCypherpunk', 'hoverAstronaut', 'hoverProtocol']);
+
 /**
  * Procedural life for unrigged models.
  * There is no skeleton in these GLBs, so the characters breathe at group
@@ -32,6 +37,10 @@ export function useProceduralIdle(
   // Ref, not a render-scoped object: useFrame reads the latest closure, and a
   // re-render must not reset the damped lean mid-motion.
   const leanState = useRef({ v: 0 }).current;
+  // Showcase-spin accumulator. Damped back to 0 (never snapped) the instant
+  // it's not explorable, so it settles out of the way before the ceremony's
+  // deliberate face-each-other rotation takes over.
+  const spinState = useRef({ v: 0 }).current;
 
   useFrame(({ clock }, dt) => {
     const root = refs.root.current;
@@ -68,7 +77,17 @@ export function useProceduralIdle(
     easing.damp(leanState, 'v', lean, 0.35, dt);
     const base = opts.side === 'left' ? characterProxy.rotL : characterProxy.rotR;
     const sign = opts.side === 'left' ? 1 : -1;
-    root.rotation.y = base + sign * leanState.v * 0.07;
+
+    // Premium showcase turn: runs through idle/hover, eases back to rest
+    // (never snaps) the instant this character is the hover focus, a panel
+    // opens, or the ceremony takes over deliberate facing.
+    if (EXPLORABLE.has(useStore.getState().scene) && leanState.v < 0.05) {
+      spinState.v += dt * SPIN_SPEED;
+    } else {
+      easing.damp(spinState, 'v', 0, 0.5, dt);
+    }
+
+    root.rotation.y = base + sign * leanState.v * 0.07 + spinState.v;
     root.position.y = opts.baseY + leanState.v * 0.012;
   });
 }
