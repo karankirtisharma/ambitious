@@ -4,14 +4,15 @@ import { Vector3 } from 'three';
 /**
  * Patches a standard material so it participates in the scan lens.
  *
- * `mode: 'cutaway'` — the outer body. Fragments INSIDE the lens are
- * discarded, punching a clean hole through to whatever is behind.
- * `mode: 'reveal'`  — the anatomy. Fragments OUTSIDE the lens are discarded,
- * so it exists only within the circle.
+ * `mode: 'cutaway'` — the outer body. Fades toward invisible approaching the
+ * lens centre, opaque well outside it — a soft vignette, not a hard hole.
+ * `mode: 'reveal'`  — the anatomy. The complementary fade: opaque at centre,
+ * gone by the outer edge. The two alphas sum to ~1 in the band between, so
+ * it crossfades rather than cutting.
  *
  * The test runs on gl_FragCoord, so it is exact in screen space regardless
  * of how the model is transformed — no projection maths in the vertex stage,
- * and it survives the breathing/sway/spin the characters are already under.
+ * and it survives the breathing/sway/spin the character is already under.
  */
 export type ScanMode = 'cutaway' | 'reveal';
 
@@ -34,11 +35,19 @@ const COMMON_HEAD = /* glsl */ `
   uniform float uScanRadius;
 `;
 
+/** Where the soft band starts, as a fraction of the radius (0 = a hard dot
+ *  at the centre, 1 = the whole disc is one long fade). */
+const FEATHER_INNER = 0.25;
+
 export function patchScanMaterial(material: Material, mode: ScanMode, uniforms: ScanUniforms) {
+  // Alpha now genuinely varies across the surface — must actually blend.
+  material.transparent = true;
+  material.depthWrite = false;
+
   // Without this, a patched material can be handed a program compiled for an
-  // identical *unpatched* material — the discard is there but uScan* never
-  // gets uploaded, so the shader reads uninitialised memory and can cull the
-  // whole mesh. The cache key must reflect the injection.
+  // identical *unpatched* material — the discard/blend logic is there but
+  // uScan* never gets uploaded, so the shader reads uninitialised memory.
+  // The cache key must reflect the injection.
   material.customProgramCacheKey = () => `cy-scan-${mode}`;
 
   material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms) => {
@@ -47,41 +56,30 @@ export function patchScanMaterial(material: Material, mode: ScanMode, uniforms: 
 
     shader.fragmentShader = COMMON_HEAD + shader.fragmentShader;
 
-    if (mode === 'cutaway') {
-      // Cut the body away inside the lens. A hard edge here is correct: the
-      // ring is drawn separately and reads as the instrument's aperture.
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <clipping_planes_fragment>',
-        `#include <clipping_planes_fragment>
-        if (uScanRadius > 0.5 && distance(gl_FragCoord.xy, uScanCenter.xy) < uScanRadius) discard;`
-      );
-    } else {
-      // The anatomy exists only inside the lens.
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <clipping_planes_fragment>',
-        `#include <clipping_planes_fragment>
-        float scanD = distance(gl_FragCoord.xy, uScanCenter.xy);
-        if (uScanRadius <= 0.5 || scanD > uScanRadius) discard;`
-      );
-      // Grade the revealed tissue toward the protocol green and lay scan
-      // lines over it, so it reads as instrumentation rather than a second
-      // model peeking through.
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <dithering_fragment>',
-        `#include <dithering_fragment>
-        {
-          float lum = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114));
-          vec3 tint = mix(vec3(0.16, 0.26, 0.05), vec3(0.62, 0.82, 0.36), lum);
-          gl_FragColor.rgb = mix(gl_FragColor.rgb, tint, 0.82);
-          // Scan lines, plus a brightening lip just inside the aperture.
-          float lines = 0.92 + 0.08 * sin(gl_FragCoord.y * 0.55);
-          float lip = smoothstep(uScanRadius, uScanRadius * 0.86, scanD);
-          gl_FragColor.rgb *= lines;
-          gl_FragColor.rgb += vec3(0.10, 0.16, 0.03) * (1.0 - lip);
-        }`
-      );
-    }
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <clipping_planes_fragment>',
+      `#include <clipping_planes_fragment>
+      float scanDist = distance(gl_FragCoord.xy, uScanCenter.xy);
+      float scanInner = uScanRadius * ${FEATHER_INNER.toFixed(3)};
+      ${
+        mode === 'cutaway'
+          ? `// 0 at the lens centre (fully gone), 1 well outside it.
+      float scanAlpha = uScanRadius > 0.5 ? smoothstep(scanInner, uScanRadius, scanDist) : 1.0;`
+          : `// Skip the anatomy pass entirely once well outside the lens.
+      if (uScanRadius <= 0.5 || scanDist > uScanRadius * 1.08) discard;
+      // 1 at the lens centre, 0 by the outer edge — the cutaway's mirror.
+      float scanAlpha = 1.0 - smoothstep(scanInner, uScanRadius, scanDist);`
+      }`
+    );
+
+    // Multiply in after <output_fragment> has assigned gl_FragColor — every
+    // build of three's standard/physical shader carries dithering_fragment
+    // immediately after it, so the alpha channel is already final here.
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <dithering_fragment>',
+      `gl_FragColor.a *= scanAlpha;
+      #include <dithering_fragment>`
+    );
   };
-  // Force a recompile if the material was already used.
   material.needsUpdate = true;
 }

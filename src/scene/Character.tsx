@@ -139,6 +139,17 @@ export function Character({ side }: { side: Side }) {
 }
 
 /**
+ * Tripo decomposes generated hands into a cluster of tiny sub-meshes, and on
+ * this asset they're malformed — blobby, fingerless. Identified once via a
+ * bounding-box sweep (extreme lateral offset, narrow waist-height band) and
+ * hidden by name, which survives the GLTF loader intact.
+ */
+const HAND_MESH_NAMES = new Set([
+  'tripo_part_14', 'tripo_part_17', 'tripo_part_20', 'tripo_part_25', 'tripo_part_27',
+  'tripo_part_29', 'tripo_part_33', 'tripo_part_36', 'tripo_part_37', 'tripo_part_40',
+]);
+
+/**
  * The anatomy beneath the skin. Cloned so the cached GLTF is never mutated,
  * and patched to exist only inside the lens.
  */
@@ -151,6 +162,10 @@ function useAnatomy(enabled: boolean, uniforms: ReturnType<typeof createScanUnif
     clone.traverse((obj) => {
       if (!(obj as Mesh).isMesh) return;
       const mesh = obj as Mesh;
+      if (HAND_MESH_NAMES.has(mesh.name)) {
+        mesh.visible = false;
+        return;
+      }
       mesh.raycast = () => {};
       // Draw before the body so the body's cutaway reads as a hole rather
       // than the anatomy being painted on top of him.
@@ -158,8 +173,6 @@ function useAnatomy(enabled: boolean, uniforms: ReturnType<typeof createScanUnif
       const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
       mesh.material = mats.map((m) => {
         const cloned = (m as MeshStandardMaterial).clone();
-        cloned.transparent = false;
-        cloned.depthWrite = true;
         patchScanMaterial(cloned, 'reveal', uniforms);
         return cloned;
       }) as unknown as MeshStandardMaterial;

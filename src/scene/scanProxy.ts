@@ -21,7 +21,7 @@ export const scanProxy = {
 };
 
 /** Lens size as a fraction of the smaller viewport axis, when fully open. */
-export const SCAN_RADIUS_RATIO = 0.15;
+export const SCAN_RADIUS_RATIO = 0.085;
 
 if (import.meta.env.DEV) {
   (window as unknown as { __scanProxy?: unknown }).__scanProxy = scanProxy;
