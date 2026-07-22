@@ -19,10 +19,14 @@ import './styles/sync.css';
 import './styles/manifesto.css';
 
 import App from './App';
+import CinematicScene from './cinematic/CinematicScene';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, CustomEase);
 // The protocol runs on wall-clock time: if the visitor tabs away mid-ceremony,
 // the synchronization keeps running — like a real protocol would.
 gsap.ticker.lagSmoothing(0);
 
-createRoot(document.getElementById('root')!).render(<App />);
+// ?scene=cinematic renders the standalone background module for review.
+const cinematic = new URLSearchParams(window.location.search).get('scene') === 'cinematic';
+
+createRoot(document.getElementById('root')!).render(cinematic ? <CinematicScene /> : <App />);

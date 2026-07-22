@@ -72,6 +72,12 @@ export function ProtocolCore() {
     }
 
     const t = clock.elapsedTime;
+    // PARKED (intentional): the core glow / orbit / shockwave FX blow out to a
+    // white cloud under the current AgX + bloom pipeline. Writing the memo
+    // objects here — which R3F does NOT propagate to the mounted materials —
+    // keeps them dormant. Do NOT redirect to *Mat.current.uniforms without
+    // retuning intensity + bloom, or the blown-out cloud comes back. (The DOM
+    // button positioning above is unaffected — it uses camera projection.)
     glowUniforms.uTime.value = t;
     glowUniforms.uIntensity.value = lightProxy.core;
     glowUniforms.uEnergy.value = fxProxy.uEnergy;

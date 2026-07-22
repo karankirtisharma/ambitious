@@ -29,6 +29,12 @@ const MODELS = [
   { src: 'assets-src/astronaut-src.glb', out: 'public/models/astronaut.glb', ratio: 0.12, fit: 'height', target: 1.8 },
   // A disc platform's silhouette survives far harder simplification.
   { src: 'assets-src/futuristic platform 3d model.glb', out: 'public/models/platform.glb', ratio: 0.05, fit: 'footprint', target: 2.3 },
+  // Anatomy underlay for the X-ray lens. Normalized to the SAME height/base
+  // as cypherpunk so the two register when nested in one transform. Kept a
+  // touch denser than the body (0.16 vs 0.12): the reveal shows internal
+  // muscle/organ detail up close, which simplifies away faster than a
+  // clothed silhouette. Run: npm run optimize:models anatomy
+  { src: 'assets-src/anatomy-src.glb', out: 'public/models/anatomy.glb', ratio: 0.16, fit: 'height', target: 1.8 },
 ];
 
 await MeshoptSimplifier.ready;

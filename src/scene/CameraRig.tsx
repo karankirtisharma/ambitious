@@ -23,23 +23,27 @@ export function CameraRig() {
     const aspect = size.width / Math.max(size.height, 1);
     const fit = Math.min(Math.max(1.45 / aspect, 1), 1.9);
 
+    // Gentle mouse parallax. Kept small and well-damped: a strong swing (0.3)
+    // felt floaty on its own AND fought the drag-to-spin — sweeping the cursor
+    // to rotate a character used to yank the camera with it. A restrained,
+    // slow-following parallax still reads as depth without hijacking the frame.
     easing.damp3(
       parallax.current,
       [
-        pointer.x * 0.3 * cameraProxy.parallax,
-        pointer.y * 0.14 * cameraProxy.parallax,
+        pointer.x * 0.13 * cameraProxy.parallax,
+        pointer.y * 0.06 * cameraProxy.parallax,
         0,
       ],
-      0.6,
+      0.85,
       dt
     );
 
-    // Incommensurate sines = organic handheld-dolly breathing, never a loop.
-    // Enough amplitude that the chamber visibly moves against the stage —
-    // the parallax is what tells the eye this is a room, not a backdrop.
-    const driftX = Math.sin(t * 0.23) * 0.11;
-    const driftY = Math.sin(t * 0.17 + 1.3) * 0.05;
-    const driftZ = Math.sin(t * 0.11) * 0.16;
+    // Incommensurate sines = organic handheld breathing, never a loop. Amplitude
+    // is deliberately SUBTLE now — just enough life that the chamber isn't dead
+    // still, but calm enough that the composition stays settled.
+    const driftX = Math.sin(t * 0.23) * 0.045;
+    const driftY = Math.sin(t * 0.17 + 1.3) * 0.02;
+    const driftZ = Math.sin(t * 0.11) * 0.06;
 
     // The protocol thump: a decaying push, plus the faintest tremble.
     const s = cameraProxy.shake;

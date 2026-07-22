@@ -1,6 +1,7 @@
 import { Component, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useGSAP } from '@gsap/react';
+import { Leva } from 'leva';
 import { Experience } from './scene/Experience';
 import { Hud } from './ui/Hud';
 import { BootLoader } from './ui/chrome/BootLoader';
@@ -77,6 +78,8 @@ export default function App() {
 
   return (
     <>
+      {/* Live render-tuning panel — invisible unless ?debug=1 is on the URL. */}
+      <Leva hidden={!DEBUG_FLAGS.debug} collapsed />
       <div className="cy-hero">
         <div className="cy-canvas-holder">
           {visible && (

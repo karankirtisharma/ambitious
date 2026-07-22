@@ -68,6 +68,11 @@ export function EnergyBridge() {
     const b = fxProxy.uBridge;
     points.current.visible = b > 0.002;
     if (!points.current.visible) return;
+    // PARKED (intentional): these sync particles blow out to a white cloud under
+    // the current AgX + bloom pipeline. Writing the memo object here — which R3F
+    // does NOT propagate to the mounted material — keeps them dormant/invisible.
+    // Do NOT redirect these to material.current.uniforms without ALSO retuning
+    // intensity + bloom, or the blown-out cloud comes back.
     uniforms.uTime.value = clock.elapsedTime;
     uniforms.uIntensity.value = Math.min(b, 1);
     uniforms.uFlow.value = fxProxy.uFlow;

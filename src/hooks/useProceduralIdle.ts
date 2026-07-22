@@ -5,6 +5,8 @@ import type { Group } from 'three';
 import { easing } from 'maath';
 import { characterProxy } from '../motion/proxies';
 import { useStore } from '../state/store';
+import { stepSpin } from '../scene/dragSpin';
+import type { SpinState } from '../scene/dragSpin';
 
 /**
  * Procedural life for unrigged models.
@@ -27,6 +29,13 @@ export function useProceduralIdle(
     /** Root rest height — the hook owns root.position.y and must compose
      *  the lean rise ON TOP of this, never overwrite it. */
     baseY: number;
+    /** Per-model authoring correction — the offset that makes THIS asset
+     *  face the camera by default (read off each GLB; never assume 0). */
+    baseYaw: number;
+    /** Drag-to-spin layer. The final yaw is a SUM of independent layers:
+     *  baseYaw + face (conductor-tweened rotL/rotR) + ack (damped lean) +
+     *  user (this) — automatic motion never fights or resets a manual spin. */
+    spin: SpinState;
   }
 ) {
   // Ref, not a render-scoped object: useFrame reads the latest closure, and a
@@ -39,11 +48,16 @@ export function useProceduralIdle(
     const sway = refs.sway.current;
     if (!root || !breath || !sway) return;
 
+    stepSpin(opts.spin);
+
     if (useStore.getState().reducedMotion) {
       breath.scale.set(1, 1, 1);
       sway.rotation.set(0, 0, 0);
       sway.position.set(0, 0, 0);
-      root.rotation.y = opts.side === 'left' ? characterProxy.rotL : characterProxy.rotR;
+      root.rotation.y =
+        opts.baseYaw +
+        (opts.side === 'left' ? characterProxy.rotL : characterProxy.rotR) +
+        opts.spin.userYaw;
       root.position.y = opts.baseY;
       return;
     }
@@ -68,7 +82,9 @@ export function useProceduralIdle(
     easing.damp(leanState, 'v', lean, 0.35, dt);
     const base = opts.side === 'left' ? characterProxy.rotL : characterProxy.rotR;
     const sign = opts.side === 'left' ? 1 : -1;
-    root.rotation.y = base + sign * leanState.v * 0.07;
+    // Layered yaw: face/base (tweened) + ack lean + user drag. A sum, never
+    // an overwrite — see spin's docs.
+    root.rotation.y = opts.baseYaw + base + sign * leanState.v * 0.07 + opts.spin.userYaw;
     root.position.y = opts.baseY + leanState.v * 0.012;
   });
 }

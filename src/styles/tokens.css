@@ -5,7 +5,8 @@
    ———————————————————————————————————————————————— */
 :root {
   /* Surfaces */
-  --bg-0: #060807;
+  /* Matches the scene's clear color — a visible seam appears if they drift. */
+  --bg-0: #040505;
   --bg-1: rgba(10, 13, 11, 0.82);
   --bg-2: #10140f;
 

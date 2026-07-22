@@ -12,26 +12,6 @@ export const PLANE_VERT = /* glsl */ `
   }
 `;
 
-/** Pedestal ring — soft annulus with a slowly rotating dash pattern. */
-export const RING_FRAG = /* glsl */ `
-  varying vec2 vUv;
-  uniform float uTime;
-  uniform float uGlow;
-  uniform float uMix;   // 0 = cool white, 1 = protocol green
-  void main() {
-    vec2 c = vUv - 0.5;
-    float r = length(c) * 2.0;
-    float ring = smoothstep(0.8, 0.85, r) * (1.0 - smoothstep(0.89, 0.94, r));
-    float dash = 0.86 + 0.14 * sin(atan(c.y, c.x) * 28.0 - uTime * 0.35);
-    float halo = smoothstep(0.55, 0.87, r) * (1.0 - smoothstep(0.87, 1.0, r)) * 0.14;
-    vec3 cool = vec3(0.92, 0.97, 1.0);
-    vec3 green = vec3(0.69, 0.96, 0.27);
-    vec3 col = mix(cool, green, uMix);
-    float a = clamp(ring * dash * (0.35 + uGlow * 0.65) + halo * uGlow, 0.0, 1.0);
-    gl_FragColor = vec4(col * (0.55 + 1.3 * uGlow), a);
-  }
-`;
-
 /**
  * Soft radial contact shadow — grounds a platform onto the backplate's
  * painted floor. Without it, objects composited over a matte painting read

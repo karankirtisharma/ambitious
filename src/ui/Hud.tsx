@@ -7,6 +7,7 @@ import { CharacterLabel } from './hud/CharacterLabel';
 import { ProtocolButton } from './hud/ProtocolButton';
 import { ScrollHint } from './hud/ScrollHint';
 import { HudStats } from './hud/HudStats';
+import { XrayLensOverlay } from './hud/XrayLensOverlay';
 import { DossierPanel } from './dossier/DossierPanel';
 import { SyncOverlay } from './overlay/SyncOverlay';
 
@@ -97,6 +98,7 @@ export function Hud() {
         </div>
       )}
 
+      <XrayLensOverlay />
       <CharacterLabel side="cypherpunk" />
       <CharacterLabel side="astronaut" />
       <ProtocolButton />

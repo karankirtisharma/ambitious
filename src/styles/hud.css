@@ -292,6 +292,27 @@
   margin-top: var(--sp-1);
 }
 
+/* ————— X-RAY LENS RING ————— */
+/* A soft glow framing the shader reveal — no hard border, to match the
+   feathered edge. Positioned imperatively (top-left origin) by rAF. */
+.cy-xray-lens {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-hud);
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0;
+  will-change: transform, opacity;
+  background: radial-gradient(
+    circle,
+    transparent 40%,
+    rgba(233, 239, 234, 0.05) 62%,
+    rgba(176, 245, 70, 0.16) 78%,
+    transparent 84%
+  );
+}
+
 /* ————— FRAME DECORATIONS ————— */
 .cy-frame {
   position: fixed;

@@ -1,97 +1,20 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { MeshReflectorMaterial } from '@react-three/drei';
 import { AdditiveBlending, BufferGeometry, Float32BufferAttribute, ShaderMaterial } from 'three';
 import { DUST_VERT, DUST_FRAG } from './shaders';
-import { useStore } from '../state/store';
-import { DEBUG_FLAGS } from '../debugFlags';
 
 /**
- * The architectural void: a reflective slab, a fogged backdrop cylinder with
- * faint vertical slits, and drifting dust. The environment frames the
- * protagonists — it never competes with them.
+ * The clean stage: just drifting dust now. The floor was removed by request —
+ * the characters and pedestals read against the background/void directly, which
+ * the art direction prefers over a reflective plane.
+ *
+ * Deliberately NO live planar reflection: a reflection pass re-renders the
+ * characters into a secondary framebuffer, and the x-ray lens (which reads
+ * gl_FragCoord in MAIN-framebuffer space) would evaluate in the wrong space
+ * there and glitch the anatomy reveal. A single main pass keeps the hover clean.
  */
 export function Stage() {
-  const tier = useStore((s) => s.tier);
-
-  return (
-    <>
-      <Floor tier={tier} />
-      <Backdrop />
-      <Dust />
-    </>
-  );
-}
-
-function Floor({ tier }: { tier: 'high' | 'mid' | 'low' }) {
-  // The reflector renders the whole scene into an offscreen FBO each frame —
-  // reserved for the high tier, at a resolution the blur makes equivalent.
-  // Known cost: drei's internal render targets are not disposed if the
-  // reflector unmounts on a tier downgrade (~8MB GPU, at most once per
-  // session) — accepted over reaching into drei internals.
-  if (tier !== 'high' || DEBUG_FLAGS.noReflect) {
-    return (
-      <mesh rotation-x={-Math.PI / 2} position-y={0}>
-        <planeGeometry args={[44, 44]} />
-        <meshStandardMaterial color="#0a0c0b" roughness={0.85} metalness={0.4} />
-      </mesh>
-    );
-  }
-  return (
-    <mesh rotation-x={-Math.PI / 2} position-y={0}>
-      <planeGeometry args={[44, 44]} />
-      <MeshReflectorMaterial
-        resolution={512}
-        blur={[260, 80]}
-        mixBlur={1}
-        mixStrength={2.2}
-        depthScale={0.7}
-        minDepthThreshold={0.35}
-        maxDepthThreshold={1.2}
-        roughness={0.85}
-        color="#0a0c0b"
-        metalness={0.45}
-        mirror={0.55}
-      />
-    </mesh>
-  );
-}
-
-function Backdrop() {
-  const slits = useMemo(() => {
-    const items: { pos: [number, number, number]; h: number }[] = [];
-    for (let i = 0; i < 9; i++) {
-      const ang = Math.PI * (0.65 + (i / 8) * 1.7); // back half arc
-      const r = 11 + (i % 3) * 1.6;
-      items.push({
-        pos: [Math.cos(ang) * r, 2.6 + (i % 2) * 0.9, Math.sin(ang) * r - 2],
-        h: 4.5 + (i % 3) * 1.4,
-      });
-    }
-    return items;
-  }, []);
-
-  return (
-    <>
-      {/* The void itself — fog does the compositional work. */}
-      <mesh position={[0, 5, -2]}>
-        <cylinderGeometry args={[15, 15, 16, 40, 1, true]} />
-        <meshStandardMaterial color="#070908" roughness={1} metalness={0} side={1} />
-      </mesh>
-      {/* Faint vertical slits, eaten by fog at varying depths. */}
-      {slits.map((s, i) => (
-        <mesh key={i} position={s.pos}>
-          <boxGeometry args={[0.045, s.h, 0.045]} />
-          <meshStandardMaterial
-            color="#0c110e"
-            emissive="#243528"
-            emissiveIntensity={0.7}
-            roughness={1}
-          />
-        </mesh>
-      ))}
-    </>
-  );
+  return <Dust />;
 }
 
 const DUST_COUNT = 300;

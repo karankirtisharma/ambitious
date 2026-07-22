@@ -23,57 +23,88 @@ export interface LightingPreset {
   dimR: number;
   /** Green environmental flood — protocol-complete only. */
   flood: number;
+  /** Hover accent pools (0..1) — each subject's colored point light. */
+  accentL: number;
+  accentR: number;
 }
 
+/**
+ * Monochrome studio semantics:
+ * - keyL+keyR SUM drives the single shadow-casting key (idle sums to the
+ *   spec's 2.75) — per-side emphasis survives as a brightness bias.
+ * - rimL/rimR are direct multipliers on the spec's hot rims (34 × value),
+ *   so 1.0 = the authored rest look.
+ * - accentL/accentR (0..1) drive each subject's colored hover pool and the
+ *   floor-ring tint. The conductor tweens them like every other channel, so
+ *   hover on/off/cross all retarget one continuous ease.
+ */
 export const LIGHTING_PRESETS: Record<SceneState, LightingPreset> = {
   idle: {
-    keyL: 1.0, keyR: 1.05, rimL: 0.14, rimR: 0.3, core: 0.15,
-    glowL: 0.5, glowR: 0.5, dimL: 0, dimR: 0, flood: 0,
+    keyL: 1.35, keyR: 1.4, rimL: 1.0, rimR: 1.0, core: 0.1,
+    glowL: 0.42, glowR: 0.42, dimL: 0, dimR: 0, flood: 0,
+    accentL: 0, accentR: 0,
   },
   hoverCypherpunk: {
-    keyL: 1.5, keyR: 0.75, rimL: 2.4, rimR: 0.3, core: 0.3,
-    glowL: 1.05, glowR: 0.32, dimL: 0, dimR: 0.5, flood: 0,
+    keyL: 1.7, keyR: 0.9, rimL: 1.5, rimR: 0.55, core: 0.2,
+    glowL: 0.75, glowR: 0.3, dimL: 0, dimR: 0.5, flood: 0,
+    accentL: 1, accentR: 0,
   },
   hoverAstronaut: {
-    keyL: 0.75, keyR: 1.5, rimL: 0.3, rimR: 2.6, core: 0.3,
-    glowL: 0.32, glowR: 1.05, dimL: 0.5, dimR: 0, flood: 0,
+    keyL: 0.9, keyR: 1.7, rimL: 0.55, rimR: 1.5, core: 0.2,
+    glowL: 0.3, glowR: 0.75, dimL: 0.5, dimR: 0, flood: 0,
+    accentL: 0, accentR: 1,
   },
   hoverProtocol: {
-    keyL: 1.05, keyR: 1.05, rimL: 0.85, rimR: 0.9, core: 1.4,
-    glowL: 0.8, glowR: 0.8, dimL: 0, dimR: 0, flood: 0,
+    keyL: 1.3, keyR: 1.3, rimL: 1.05, rimR: 1.05, core: 1.2,
+    glowL: 0.6, glowR: 0.6, dimL: 0, dimR: 0, flood: 0,
+    accentL: 0.35, accentR: 0.35,
   },
   cypherpunkPanel: {
-    keyL: 1.65, keyR: 0.55, rimL: 2.1, rimR: 0.22, core: 0.2,
-    glowL: 1.1, glowR: 0.25, dimL: 0, dimR: 0.68, flood: 0,
+    keyL: 1.8, keyR: 0.65, rimL: 1.45, rimR: 0.4, core: 0.15,
+    glowL: 0.8, glowR: 0.25, dimL: 0, dimR: 0.68, flood: 0,
+    accentL: 1, accentR: 0,
   },
   astronautPanel: {
-    keyL: 0.55, keyR: 1.65, rimL: 0.22, rimR: 2.3, core: 0.2,
-    glowL: 0.25, glowR: 1.1, dimL: 0.68, dimR: 0, flood: 0,
+    keyL: 0.65, keyR: 1.8, rimL: 0.4, rimR: 1.45, core: 0.15,
+    glowL: 0.25, glowR: 0.8, dimL: 0.68, dimR: 0, flood: 0,
+    accentL: 0, accentR: 1,
   },
   protocolInitiated: {
-    keyL: 0.95, keyR: 0.95, rimL: 1.5, rimR: 1.5, core: 2.6,
-    glowL: 1.2, glowR: 1.2, dimL: 0, dimR: 0, flood: 0.08,
+    keyL: 1.1, keyR: 1.1, rimL: 1.25, rimR: 1.25, core: 2.2,
+    glowL: 0.95, glowR: 0.95, dimL: 0, dimR: 0, flood: 0.06,
+    accentL: 0.6, accentR: 0.6,
   },
   synchronization: {
-    keyL: 0.85, keyR: 0.85, rimL: 2.4, rimR: 2.4, core: 3.6,
-    glowL: 1.5, glowR: 1.5, dimL: 0, dimR: 0, flood: 0.2,
+    keyL: 1.0, keyR: 1.0, rimL: 1.7, rimR: 1.7, core: 3.2,
+    glowL: 1.2, glowR: 1.2, dimL: 0, dimR: 0, flood: 0.16,
+    accentL: 0.85, accentR: 0.85,
   },
   protocolComplete: {
-    keyL: 1.15, keyR: 1.15, rimL: 1.7, rimR: 1.7, core: 2.2,
-    glowL: 1.15, glowR: 1.15, dimL: 0, dimR: 0, flood: 0.55,
+    keyL: 1.35, keyR: 1.35, rimL: 1.4, rimR: 1.4, core: 1.9,
+    glowL: 0.95, glowR: 0.95, dimL: 0, dimR: 0, flood: 0.42,
+    accentL: 0.7, accentR: 0.7,
   },
   scrollStory: {
-    keyL: 1.0, keyR: 1.0, rimL: 1.2, rimR: 1.2, core: 1.6,
-    glowL: 0.9, glowR: 0.9, dimL: 0, dimR: 0, flood: 0.4,
+    keyL: 1.2, keyR: 1.2, rimL: 1.1, rimR: 1.1, core: 1.4,
+    glowL: 0.75, glowR: 0.75, dimL: 0, dimR: 0, flood: 0.32,
+    accentL: 0.45, accentR: 0.45,
   },
 };
 
 /** Scene palette. */
 export const COLORS = {
-  bg: '#060807',
+  // Near-neutral deep black: the previous green-tinted #060807 combined with
+  // fog into a murky wash; the reference look is a clean void.
+  bg: '#040505',
   green: '#B0F546',
   greenDeep: '#5fae32',
-  rimCool: '#cfe8ff',
-  keyWarm: '#fff4e6',
-  fill: '#0c1210',
+  /** Monochrome studio rig. */
+  key: '#f6f8fb',
+  fill: '#aab4c0',
+  rim: '#dfe8f2',
+  hemiSky: '#c8ced6',
+  hemiGround: '#0a0b0d',
+  /** Hover accents — one per subject. */
+  accentL: '#B0F546',
+  accentR: '#cfe0ff',
 } as const;

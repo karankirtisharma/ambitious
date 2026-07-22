@@ -18,6 +18,7 @@
     "@react-three/fiber": "^9.3.0",
     "@react-three/postprocessing": "^3.0.4",
     "gsap": "^3.13.0",
+    "leva": "^0.10.1",
     "maath": "^0.10.8",
     "postprocessing": "^6.37.1",
     "react": "^19.1.0",
