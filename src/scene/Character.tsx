@@ -77,8 +77,12 @@ export function Character({ side }: { side: Side }) {
         // Specular gets somewhere to form against the dark env: push the
         // env response hard, pull roughness down into the clamp band, keep
         // metalness physical.
-        std.envMapIntensity = 2.4;
-        std.roughness = Math.min(Math.max(std.roughness * 0.82, 0.12), 0.7);
+        // Glossier + more env response = tighter, HOTTER speculars, which is
+        // what crosses the bloom threshold (1.0) and gives the edges their
+        // subtle glow. The 0.12 roughness floor stays so skin and cloth never
+        // tip into plastic-mirror territory.
+        std.envMapIntensity = 2.9;
+        std.roughness = Math.min(Math.max(std.roughness * 0.78, 0.12), 0.62);
         std.metalness = Math.min(std.metalness, 0.85);
         // The lens needs a per-fragment hole, so the body's shell fades to
         // transparent INSIDE the window. Patch overrides the opaque flags

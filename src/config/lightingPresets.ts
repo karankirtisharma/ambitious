@@ -44,13 +44,19 @@ export const LIGHTING_PRESETS: Record<SceneState, LightingPreset> = {
     glowL: 0.42, glowR: 0.42, dimL: 0, dimR: 0, flood: 0,
     accentL: 0, accentR: 0,
   },
+  // Hover = the subject GLOWS. The rim is the glow: it is the only channel
+  // that puts light on the silhouette rather than the form, so driving it well
+  // past the bloom threshold wraps the hovered figure in its own colour —
+  // GREEN on the left, COOL WHITE on the right (see COLORS/LightingRig). The
+  // un-hovered side drops to 0.55 so the contrast reads as attention, not as
+  // "both got brighter".
   hoverCypherpunk: {
-    keyL: 1.7, keyR: 0.9, rimL: 1.5, rimR: 0.55, core: 0.2,
+    keyL: 1.7, keyR: 0.9, rimL: 2.5, rimR: 0.55, core: 0.2,
     glowL: 0.75, glowR: 0.3, dimL: 0, dimR: 0.5, flood: 0,
     accentL: 1, accentR: 0,
   },
   hoverAstronaut: {
-    keyL: 0.9, keyR: 1.7, rimL: 0.55, rimR: 1.5, core: 0.2,
+    keyL: 0.9, keyR: 1.7, rimL: 0.55, rimR: 2.5, core: 0.2,
     glowL: 0.3, glowR: 0.75, dimL: 0.5, dimR: 0, flood: 0,
     accentL: 0, accentR: 1,
   },
@@ -59,13 +65,16 @@ export const LIGHTING_PRESETS: Record<SceneState, LightingPreset> = {
     glowL: 0.6, glowR: 0.6, dimL: 0, dimR: 0, flood: 0,
     accentL: 0.35, accentR: 0.35,
   },
+  // The panel states hold the hover glow — the subject you opened stays lit in
+  // its own colour while the other recedes — a touch under hover so the open
+  // dossier, not the figure, is the brightest thing on screen.
   cypherpunkPanel: {
-    keyL: 1.8, keyR: 0.65, rimL: 1.45, rimR: 0.4, core: 0.15,
+    keyL: 1.8, keyR: 0.65, rimL: 2.3, rimR: 0.4, core: 0.15,
     glowL: 0.8, glowR: 0.25, dimL: 0, dimR: 0.68, flood: 0,
     accentL: 1, accentR: 0,
   },
   astronautPanel: {
-    keyL: 0.65, keyR: 1.8, rimL: 0.4, rimR: 1.45, core: 0.15,
+    keyL: 0.65, keyR: 1.8, rimL: 0.4, rimR: 2.3, core: 0.15,
     glowL: 0.25, glowR: 0.8, dimL: 0.68, dimR: 0, flood: 0,
     accentL: 0, accentR: 1,
   },

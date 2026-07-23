@@ -41,13 +41,26 @@ export function LightingRig() {
 
   useFrame(() => {
     key.current.intensity = lightProxy.keyL + lightProxy.keyR;
-    rimL.current.intensity = lightProxy.rimL * 34;
-    rimR.current.intensity = lightProxy.rimR * 34;
-    // Accent pools ease in via the conductor. Kept moderate so it colors the
-    // lower body/platform glow rather than bathing the whole torso — a
-    // saturated wash was reading as "the character went green".
-    accL.current.intensity = lightProxy.accentL * 2.1;
-    accR.current.intensity = lightProxy.accentR * 2.1;
+    // 46, not 34. The host bloom threshold is 1.0, so an edge highlight only
+    // GLOWS once its specular actually crosses 1.0 in the linear HDR buffer.
+    // Running the rims hot is what buys the professional edge bloom; raising
+    // bloom itself would wash the whole frame instead of just the highlights.
+    // Key and fill are deliberately untouched — the lighting is the same, only
+    // the highlights now carry glow.
+    // Per-subject rim COLOUR (see the spotlights below): cypherpunk = protocol
+    // green, astronaut = cool white. Green runs a touch lower than white — a
+    // saturated green rim reads hotter and blooms more eagerly, and over-driving
+    // it is exactly what used to make him look like "he went green".
+    rimL.current.intensity = lightProxy.rimL * 42;
+    rimR.current.intensity = lightProxy.rimR * 46;
+    // Accent pools ease in via the conductor. Driven HARD — this is the light
+    // the figure appears to be standing in, so it has to be the strongest thing
+    // touching the lower body. What keeps it from flooding is not low intensity
+    // but the tight range + steep decay below: bright core, fast falloff. That
+    // pairing is the whole trick — turning intensity down instead just made a
+    // dim flat wash, which is the same failure at lower brightness.
+    accL.current.intensity = lightProxy.accentL * 2.8;
+    accR.current.intensity = lightProxy.accentR * 2.8;
     core.current.intensity = (lightProxy.core + fxProxy.uEnergy * 2.2) * 3;
     flood.current.intensity = lightProxy.flood * 22;
   });
@@ -84,7 +97,11 @@ export function LightingRig() {
       {/* Weak opposite fill — the dark side stays dark. */}
       <directionalLight position={[4.6, 2.4, 3.2]} intensity={0.55} color={COLORS.fill} target={targets.c} />
 
-      {/* Hot rims, one per subject — edge separation against the void. */}
+      {/* Hot rims, one per subject — edge separation against the void, and the
+          colour story the presets always described: the cypherpunk's rim is
+          PROTOCOL GREEN, the astronaut's is COOL WHITE. Driven past the bloom
+          threshold, so each figure carries a coloured spotlight glow on its
+          edges rather than a flat outline. */}
       <spotLight
         ref={rimL}
         position={[-4.4, 3.8, -4.0]}
@@ -92,7 +109,7 @@ export function LightingRig() {
         angle={Math.PI * 0.3}
         penumbra={0.75}
         decay={2}
-        color={COLORS.rim}
+        color={COLORS.green}
         target={targets.l}
       />
       <spotLight
@@ -107,9 +124,21 @@ export function LightingRig() {
       />
 
       {/* Per-subject accent pools — soft colored light, low and forward so it
-          pools on the platform/lower body rather than washing the torso. */}
-      <pointLight ref={accL} position={[-CHAR_X + 0.2, 0.8, 1.3]} color={COLORS.accentL} distance={3.8} decay={2.4} />
-      <pointLight ref={accR} position={[CHAR_X - 0.2, 0.8, 1.3]} color={COLORS.accentR} distance={3.8} decay={2.4} />
+          pools on the platform/lower body rather than washing the torso.
+          Tighter range + steeper decay than physical (2.8 vs 2) on purpose:
+          a fast falloff is what gives the accent SHAPE. The old 3.8/2.4 reached
+          far enough to light the deck almost evenly, and an evenly-lit surface
+          has no gradient to read as illumination — it just looks tinted. Now it
+          falls off inside the podium, so there is a bright near edge and a dark
+          far edge, and the character gets a kick rather than a bath. */}
+      {/* Sat at y 0.8 these read as lights pointed AT the figure. Dropped to
+          just above the (now smaller) deck at 0.28, they rake UPWARD instead —
+          hottest at the shoes and platform lip, falling off up the legs, gone
+          by the chest. That vertical gradient is what sells "the podium is the
+          source", which a light at chest height can never do no matter how
+          bright it runs. */}
+      <pointLight ref={accL} position={[-CHAR_X + 0.2, 0.42, 1.3]} color={COLORS.accentL} distance={3.2} decay={2.8} />
+      <pointLight ref={accR} position={[CHAR_X - 0.2, 0.42, 1.3]} color={COLORS.accentR} distance={3.2} decay={2.8} />
 
       {/* The protocol core's light — ignites with the sequence. */}
       <pointLight ref={core} position={[0, 1.25, 0.2]} color={COLORS.green} distance={6} decay={2} />

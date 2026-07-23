@@ -9,12 +9,26 @@ export interface CameraPose {
 /** Character root X positions — the two pedestals. */
 export const CHAR_X = 2.2;
 /**
+ * Uniform scale applied to each podium (platform + halo rings + contact
+ * shadow). The characters are NOT scaled — a slightly smaller stage under a
+ * full-size figure reads as a plinth rather than a arena floor.
+ */
+export const STAGE_SCALE = 0.8;
+/**
  * Measured stand heights: the platform's dish surface sits at y 0.352 and
  * both models' shoe soles sit at their own origin (verified via per-mesh
  * world bounds — the shoe meshes, not the pants hem). Root = dish height,
  * astronaut +7mm for his below-origin boot soles.
+ *
+ * DERIVED from STAGE_SCALE, never typed in: the podium scales about its base,
+ * so its deck drops with it. Hardcoding these would leave both figures floating
+ * (or sunk) the moment the stage is resized. Change STAGE_SCALE alone and the
+ * feet stay planted.
  */
-export const STAND_Y = { cypherpunk: 0.352, astronaut: 0.359 } as const;
+export const STAND_Y = {
+  cypherpunk: 0.352 * STAGE_SCALE,
+  astronaut: 0.359 * STAGE_SCALE,
+} as const;
 /** Chest height used by the energy bridge endpoints. */
 export const CHEST_Y = 1.67;
 

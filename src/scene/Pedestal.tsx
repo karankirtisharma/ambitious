@@ -4,7 +4,7 @@ import { useGLTF } from '@react-three/drei';
 import { Mesh, MeshStandardMaterial } from 'three';
 import { PLANE_VERT, CONTACT_FRAG } from './shaders';
 import { HaloRings } from './HaloRings';
-import { CHAR_X } from '../config/cameraPoses';
+import { CHAR_X, STAGE_SCALE } from '../config/cameraPoses';
 import { beginDrag, createSpin, stepSpin } from './dragSpin';
 import type { Group } from 'three';
 
@@ -49,10 +49,14 @@ export function Pedestal({ side }: { side: 'left' | 'right' }) {
         std.envMapIntensity = 2.4;
         std.roughness = Math.min(Math.max(std.roughness * 0.82, 0.12), 0.7);
         std.metalness = Math.min(std.metalness, 0.85);
-        // The GLB ships hot green emissive on the deck — it blew the platform
-        // top out to lime. Capped so the glow reads as ring LEDs, not a pool.
-        if (std.emissive && std.emissiveIntensity > 0.45) {
-          std.emissiveIntensity = 0.45;
+        // The GLB ships hot green emissive on the deck. Uncapped it blew the
+        // platform top out to flat lime, so it stays capped — but the cap is
+        // the podium's OWN glow, the light the figure appears to stand in, so
+        // it is held just under the 1.0 bloom threshold rather than well below
+        // it. The deck now reads as a lit surface that blooms at its hottest
+        // creases, instead of a dark disc with a bright rim stuck on.
+        if (std.emissive && std.emissiveIntensity > 0.62) {
+          std.emissiveIntensity = 0.62;
         }
       }
     });
@@ -67,7 +71,11 @@ export function Pedestal({ side }: { side: 'left' | 'right' }) {
   });
 
   return (
-    <group position={[x, 0, 0]}>
+    // Scales about the group origin, which sits ON the floor (y=0) — so the
+    // podium shrinks toward its own base and stays grounded. Everything podium
+    // (platform, halo rings, contact shadow) lives inside and scales together;
+    // the character does not, and its STAND_Y is derived from STAGE_SCALE.
+    <group position={[x, 0, 0]} scale={STAGE_SCALE}>
       {/* Occlusion pooling under the platform — without it the composite
           reads as a sticker on the backplate rather than a thing standing
           on its floor. Drawn first so the halo glows over it. */}

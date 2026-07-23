@@ -4,6 +4,7 @@ import { useGSAP } from '@gsap/react';
 import { useStore } from '../../state/store';
 import type { Side } from '../../state/transitions';
 import { CHARACTER_LABELS, HOVER_LABELS } from '../../config/content';
+import { AsciiGlitchRipple } from '../fx/AsciiGlitchRipple';
 import { md, DUR } from '../../motion/motionConfig';
 
 /**
@@ -73,7 +74,19 @@ export function CharacterLabel({ side }: { side: Side }) {
       ].join(' ')}
       aria-hidden="true"
     >
-      <div className="cy-charlabel__name">{label.primary}</div>
+      {/* Fired by SCENE state, not by pointer: the HUD sits under
+          pointer-events:none, so this node can never receive mouseenter.
+          The name glitches at the instant its 3D character is hovered. */}
+      <AsciiGlitchRipple
+        as="div"
+        className="cy-charlabel__name"
+        trigger={hot}
+        interactive={false}
+        dur={780}
+        spread={1.3}
+      >
+        {label.primary}
+      </AsciiGlitchRipple>
       <div className="cy-charlabel__role">{label.secondary}</div>
       <div className="cy-charlabel__tech">
         {HOVER_LABELS[side].map((line) => (

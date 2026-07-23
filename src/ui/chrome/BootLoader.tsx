@@ -4,6 +4,11 @@ import { useProgress } from '@react-three/drei';
 import { Logo } from './Logo';
 import { useStore } from '../../state/store';
 import { bootFlags } from '../../hooks/useCapabilities';
+import { FlipFadeText } from '../fx/FlipFadeText';
+
+/** Cycles beside the percentage while assets stream in. Deliberately verbs in
+ *  the boot log's voice, so the two readouts feel like one machine talking. */
+const BOOT_WORDS = ['DECRYPTING', 'HANDSHAKING', 'MOUNTING', 'CALIBRATING', 'SYNCING'];
 
 const LOG_LINES: Array<[number, string]> = [
   [0, 'ESTABLISHING SECURE CHANNEL …'],
@@ -98,7 +103,9 @@ export function BootLoader() {
             <i style={{ transform: `scaleX(${Math.max(pct, 2) / 100})` }} />
           </div>
           <div className="cy-boot__pct num">
-            <span>DECRYPTING ASSETS</span>
+            {/* Held short: the boot gate can clear in ~1.4s, and a 2.5s cycle
+                would only ever show a single word. */}
+            <FlipFadeText words={BOOT_WORDS} interval={900} />
             <span>{String(pct).padStart(3, '0')}%</span>
           </div>
         </div>

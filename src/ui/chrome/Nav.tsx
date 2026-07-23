@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Logo } from './Logo';
+import { AsciiGlitchRipple } from '../fx/AsciiGlitchRipple';
 
 const LINKS = ['HOME', 'MANIFESTO', 'SERVICES', 'CONTACT'] as const;
 
@@ -155,14 +156,20 @@ export function Nav() {
 
 function NavLink({ label }: { label: string }) {
   return (
-    <a
+    // Scramble ripples out from wherever the cursor crosses the word — the
+    // effect's native home is exactly this kind of short monospace link.
+    // `aria-label` inside the component keeps the real word announced.
+    <AsciiGlitchRipple
+      as="a"
       className="cy-nav__link"
       href="#"
+      dur={720}
+      spread={1.15}
       aria-current={label === 'MANIFESTO' ? 'page' : undefined}
       onClick={(e) => e.preventDefault()}
     >
       {label}
-    </a>
+    </AsciiGlitchRipple>
   );
 }
 

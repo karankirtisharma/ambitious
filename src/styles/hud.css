@@ -813,3 +813,31 @@
     display: none;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Text FX
+   ───────────────────────────────────────────────────────────── */
+
+/* ASCII glitch ripple. The substitute glyphs are not metrically identical to
+   the originals, so the element must not re-wrap or collapse runs of spaces
+   mid-wave; the component additionally pins the pixel width while animating. */
+.cy-ascii {
+  display: inline-block;
+  white-space: pre;
+  font-variant-ligatures: none;
+}
+
+/* Flip-fade cycling word. Perspective lives on the wrapper so every letter
+   shares one vanishing point — per-letter perspective makes the outer letters
+   of a long word visibly rotate on a different axis than the inner ones. */
+.cy-flip {
+  display: inline-flex;
+  white-space: pre;
+  perspective: 600px;
+}
+
+.cy-flip__l {
+  display: inline-block;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+}

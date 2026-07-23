@@ -24,8 +24,11 @@ const WIDTH = 2.3;
 const PLATFORM_H = 0.35;
 const TUBE_K = WIDTH / 1.62;
 
+// The widest arc (r = 0.82 * WIDTH) was REMOVED by art direction: at ~3.8 units
+// across against a 2.3 platform it sprawled far off the podium onto open floor
+// and the two sides nearly collided at centre, reading as stray geometry rather
+// than podium light. Keep the halo inside/near its own platform footprint.
 const RINGS = [
-  { r: 0.82 * WIDTH, tube: 0.011 * TUBE_K, y: 0.012, op: 0.95, spin: 0.22, recolor: true },
   { r: 0.63 * WIDTH, tube: 0.009 * TUBE_K, y: 0.014, op: 0.8, spin: -0.17, recolor: true },
   { r: 0.46 * WIDTH, tube: 0.007 * TUBE_K, y: 0.66 * PLATFORM_H, op: 0.75, spin: -0.31, recolor: false },
 ] as const;
@@ -50,7 +53,6 @@ function makePoolTexture(): CanvasTexture {
 
 export function HaloRings({ side }: { side: 'left' | 'right' }) {
   const outer = useRef<Mesh>(null!);
-  const outer2 = useRef<Mesh>(null!);
   const inner = useRef<Mesh>(null!);
   const pool = useRef<Mesh>(null!);
 
@@ -66,28 +68,28 @@ export function HaloRings({ side }: { side: 'left' | 'right' }) {
     const t = clock.elapsedTime;
     // Unrolled — no per-frame array/closure allocation in this hot path.
     if (outer.current) outer.current.rotation.z = t * RINGS[0].spin + phase;
-    if (outer2.current) outer2.current.rotation.z = t * RINGS[1].spin + phase;
-    if (inner.current) inner.current.rotation.z = t * RINGS[2].spin + phase;
+    if (inner.current) inner.current.rotation.z = t * RINGS[1].spin + phase;
 
     // Hover amount = this side's accent channel (eased by the conductor).
     const hover = side === 'left' ? lightProxy.accentL : lightProxy.accentR;
     // The protocol energy also lights the rings up.
     const lit = Math.min(hover + fxProxy.uEnergy, 1);
 
-    const outerCol = scratch.copy(RING_BASE).lerp(accent, hover * 0.6);
-    (outer.current.material as MeshBasicMaterial).color.copy(outerCol);
-    (outer2.current.material as MeshBasicMaterial).color.copy(outerCol);
+    const om = outer.current.material as MeshBasicMaterial;
+    om.color.copy(scratch.copy(RING_BASE).lerp(accent, hover * 0.6));
     // inner stays the bright near-white anchor — never recolors.
 
     // Glow visibility follows hover + protocol.
-    const om = outer.current.material as MeshBasicMaterial;
-    const o2m = outer2.current.material as MeshBasicMaterial;
     om.opacity = RINGS[0].op * (0.45 + 0.55 * lit);
-    o2m.opacity = RINGS[1].op * (0.45 + 0.55 * lit);
 
+    // The pool is SPILL, not a paint layer. At 0.8 it covered the whole deck in
+    // flat, clipped accent — no falloff left, so it read as coloured plastic
+    // instead of light. This sits high enough to be the glow the figure stands
+    // in, low enough that the radial gradient still has somewhere to fall to
+    // and the ring stays the brightest thing on the podium (source > spill).
     const pm = pool.current.material as MeshBasicMaterial;
     pm.color.copy(POOL_REST).lerp(accent, hover);
-    pm.opacity = hover * 0.8;
+    pm.opacity = hover * 0.55;
   });
 
   return (
@@ -107,7 +109,7 @@ export function HaloRings({ side }: { side: 'left' | 'right' }) {
       {RINGS.map((ring, i) => (
         <mesh
           key={i}
-          ref={i === 0 ? outer : i === 1 ? outer2 : inner}
+          ref={i === 0 ? outer : inner}
           rotation-x={-Math.PI / 2}
           position-y={ring.y}
         >
